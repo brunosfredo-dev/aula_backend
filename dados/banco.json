@@ -1,5 +1,5 @@
 {
-  "proximoId": 5,
+  "proximoId": 8,
   "produtos": [
     {
       "id": 1,
@@ -12,9 +12,19 @@
       "preco": 129.9
     },
     {
-      "id": 3,
-      "nome": "Tênis",
-      "preco": 299.9
+      "id": 5,
+      "nome": "sapato",
+      "preco": 20
+    },
+    {
+      "id": 6,
+      "nome": "meias",
+      "preco": 5
+    },
+    {
+      "id": 7,
+      "nome": "saia",
+      "preco": 10
     }
   ]
 }
