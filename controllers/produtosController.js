@@ -1,14 +1,11 @@
-const { lerBanco, salvarBanco } = require('../dados/produtosRepositorio');
+const repo = require('../dados/produtosRepositorio');
 
-async function listar(req, res) {
-  const banco = await lerBanco();
-  res.json(banco.produtos);
+function listar(req, res) {
+  res.json(repo.listar());
 }
 
-async function buscarPorId(req, res) {
-  const banco = await lerBanco();
-  const id = Number(req.params.id);
-  const produto = banco.produtos.find(p => p.id === id);
+function buscarPorId(req, res) {
+  const produto = repo.buscarPorId(Number(req.params.id));
 
   if (!produto) {
     return res.status(404).json({ erro: 'Produto não encontrado' });
@@ -17,51 +14,42 @@ async function buscarPorId(req, res) {
   res.json(produto);
 }
 
-async function criar(req, res) {
+function criar(req, res) {
   const { nome, preco } = req.body;
 
-  if (!nome || !preco) {
-    return res.status(400).json({ erro: 'Nome e preço são obrigatórios' });
+  if (!nome || !preco || preco <= 0) {
+    return res.status(400).json({ erro: 'Informe um nome e um preço maior que zero' });
   }
 
-  const banco = await lerBanco();
-  const novoProduto = { id: banco.proximoId, nome, preco };
-
-  banco.produtos.push(novoProduto);
-  banco.proximoId++;
-  await salvarBanco(banco);
-
+  const novoProduto = repo.criar(nome, preco);
   res.status(201).json(novoProduto);
 }
 
-async function atualizar(req, res) {
-  const banco = await lerBanco();
+function atualizar(req, res) {
   const id = Number(req.params.id);
-  const produto = banco.produtos.find(p => p.id === id);
+  const produto = repo.buscarPorId(id);
 
   if (!produto) {
     return res.status(404).json({ erro: 'Produto não encontrado' });
   }
 
-  const { nome, preco } = req.body;
-  if (nome !== undefined) produto.nome = nome;
-  if (preco !== undefined) produto.preco = preco;
+  const nome = req.body.nome ?? produto.nome;
+  const preco = req.body.preco ?? produto.preco;
 
-  await salvarBanco(banco);
-  res.json(produto);
+  if (!nome || !preco || preco <= 0) {
+    return res.status(400).json({ erro: 'Informe um nome e um preço maior que zero' });
+  }
+
+  res.json(repo.atualizar(id, nome, preco));
 }
 
-async function remover(req, res) {
-  const banco = await lerBanco();
-  const id = Number(req.params.id);
-  const indice = banco.produtos.findIndex(p => p.id === id);
+function remover(req, res) {
+  const removido = repo.remover(Number(req.params.id));
 
-  if (indice === -1) {
+  if (!removido) {
     return res.status(404).json({ erro: 'Produto não encontrado' });
   }
 
-  banco.produtos.splice(indice, 1);
-  await salvarBanco(banco);
   res.status(204).send();
 }
 
